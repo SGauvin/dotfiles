@@ -31,7 +31,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 ### Rust programs
 ```sh
-cargo install --locked yazi-fm && cargo install --locked bob-nvim && cargo install --locked starship
+cargo install --locked yazi-fm && cargo install --locked bob-nvim && cargo install --locked starship && cargo install --locked zoxide
 ```
 
 ## Install latest neovim using Bob
