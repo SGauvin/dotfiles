@@ -10,7 +10,7 @@
 - stow
 
 
-## Add support for image preview in neovim
+## Add support for image previews in neovim
 ```sh
 luarocks --local install magick
 ```
