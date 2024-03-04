@@ -125,6 +125,16 @@ if not vim.loop.fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
+-- Function for showing recording status in lualine
+local function show_macro_recording()
+	local recording_register = vim.fn.reg_recording()
+	if recording_register == "" then
+		return ""
+	else
+		return "Recording @" .. recording_register
+	end
+end
+
 -- [[ Configure and install plugins ]]
 --
 --  To check the current status of your plugins, run
@@ -763,35 +773,62 @@ require("lazy").setup({
 
 	{
 		"nvim-lualine/lualine.nvim",
-		opts = {
-			theme = "catppuccin",
-			options = {
-				component_separators = " ",
-				section_separators = { left = "", right = "" },
-			},
-			sections = {
-				lualine_a = {
-					{ "mode" },
+		config = function()
+			require("lualine").setup({
+				theme = "catppuccin",
+				options = {
+					component_separators = " ",
+					section_separators = { left = "", right = "" },
 				},
-				lualine_b = { { "filename", path = 1 }, "branch", "diff" },
-				lualine_c = { "progress" },
-				lualine_x = {},
-				lualine_y = { "filetype", "encoding", "searchcount" },
-				lualine_z = {
-					{ "location", separator = { right = "" }, left_padding = 2 },
+				sections = {
+					lualine_a = {
+						{ "mode" },
+					},
+					lualine_b = { { "filename", path = 1 }, "branch", "diff" },
+					lualine_c = { "progress", { "macro-recording", fmt = show_macro_recording } },
+					lualine_x = {},
+					lualine_y = { "filetype", "encoding", "searchcount" },
+					lualine_z = {
+						{ "location", separator = { right = "" }, left_padding = 2 },
+					},
 				},
-			},
-			inactive_sections = {
-				lualine_a = { "filename" },
-				lualine_b = {},
-				lualine_c = {},
-				lualine_x = {},
-				lualine_y = {},
-				lualine_z = { "location" },
-			},
-			tabline = {},
-			extensions = { "neo-tree", "mason", "fugitive" },
-		},
+				inactive_sections = {
+					lualine_a = { "filename" },
+					lualine_b = {},
+					lualine_c = {},
+					lualine_x = {},
+					lualine_y = {},
+					lualine_z = { "location" },
+				},
+				tabline = {},
+				extensions = { "neo-tree", "mason", "fugitive" },
+			})
+			vim.api.nvim_create_autocmd("RecordingEnter", {
+				callback = function()
+					require("lualine").refresh()
+				end,
+			})
+			vim.api.nvim_create_autocmd("RecordingLeave", {
+				callback = function()
+					-- This is going to seem really weird!
+					-- Instead of just calling refresh we need to wait a moment because of the nature of
+					-- `vim.fn.reg_recording`. If we tell lualine to refresh right now it actually will
+					-- still show a recording occuring because `vim.fn.reg_recording` hasn't emptied yet.
+					-- So what we need to do is wait a tiny amount of time (in this instance 50 ms) to
+					-- ensure `vim.fn.reg_recording` is purged before asking lualine to refresh.
+					local timer = vim.loop.new_timer()
+					timer:start(
+						50,
+						0,
+						vim.schedule_wrap(function()
+							require("lualine").refresh({
+								place = { "statusline" },
+							})
+						end)
+					)
+				end,
+			})
+		end,
 	},
 
 	{ -- Highlight, edit, and navigate code
