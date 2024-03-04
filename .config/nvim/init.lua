@@ -790,7 +790,7 @@ require("lazy").setup({
 				lualine_z = { "location" },
 			},
 			tabline = {},
-			extensions = { "nvim-tree", "mason" },
+			extensions = { "neo-tree", "mason", "fugitive" },
 		},
 	},
 
@@ -828,10 +828,19 @@ require("lazy").setup({
 			"3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
 		},
 		config = function()
-			vim.keymap.set("n", "<C-p>", "<cmd>Neotree toggle<CR>")
+			vim.keymap.set("n", "<C-f>", "<cmd>Neotree action=focus toggle<CR>")
 			require("neo-tree").setup({
+				close_if_last_window = false,
 				filesystem = {
+					follow_current_file = {
+						enabled = true,
+						leave_dirs_open = false,
+					},
 					hijack_netrw_behavior = "open_current",
+					filtered_items = {
+						hide_dotfiles = false,
+						hide_gitignored = false,
+					},
 				},
 			})
 		end,
