@@ -839,7 +839,17 @@ require("lazy").setup({
 
 			---@diagnostic disable-next-line: missing-fields
 			require("nvim-treesitter.configs").setup({
-				ensure_installed = { "bash", "c", "html", "lua", "markdown", "vim", "vimdoc" },
+				ensure_installed = {
+					"bash",
+					"c",
+					"html",
+					"lua",
+					"markdown",
+					"vim",
+					"vimdoc",
+					"markdown",
+					"markdown_inline",
+				},
 				-- Autoinstall languages that are not installed
 				auto_install = true,
 				highlight = { enable = true },
@@ -867,7 +877,7 @@ require("lazy").setup({
 		config = function()
 			vim.keymap.set("n", "<C-f>", "<cmd>Neotree action=focus toggle<CR>")
 			require("neo-tree").setup({
-				close_if_last_window = false,
+				close_if_last_window = true,
 				filesystem = {
 					follow_current_file = {
 						enabled = true,
