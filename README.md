@@ -67,5 +67,11 @@ cd tmux-3.4 && ./configure
 make release=1 -j8
 sudo make release=1 install
 ```
+## Install a NerdFont
 
-
+```sh
+wget -P ~/.local/share/fonts https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraMono.zip
+cd ~/.local/share/fonts
+unzip FiraMono.zip
+rm FiraMono.zip LICENSE README.md
+```
