@@ -196,7 +196,7 @@ require("lazy").setup({
 						gs.next_hunk()
 					end)
 					return "<Ignore>"
-				end, { expr = true })
+				end, { expr = true, desc = "Next hunk" })
 
 				map("n", "[c", function()
 					if vim.wo.diff then
@@ -204,7 +204,7 @@ require("lazy").setup({
 					end
 					vim.schedule(function()
 						gs.prev_hunk()
-					end)
+					end, { desc = "Previous Hunk" })
 					return "<Ignore>"
 				end, { expr = true })
 
