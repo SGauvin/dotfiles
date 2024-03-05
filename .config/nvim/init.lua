@@ -741,7 +741,9 @@ require("lazy").setup({
 		name = "catppuccin",
 		priority = 1000,
 		lazy = false,
-		opts = {},
+		opts = {
+			transparent_background = true,
+		},
 		config = function()
 			vim.cmd.colorscheme("catppuccin")
 			vim.cmd.hi("Comment gui=none")
@@ -774,6 +776,7 @@ require("lazy").setup({
 	{
 		"nvim-lualine/lualine.nvim",
 		config = function()
+			require("catppuccin").options.transparent_background = true
 			require("lualine").setup({
 				theme = "catppuccin",
 				options = {
@@ -785,7 +788,10 @@ require("lazy").setup({
 						{ "mode" },
 					},
 					lualine_b = { { "filename", path = 1 }, "branch", "diff" },
-					lualine_c = { "progress", { "macro-recording", fmt = show_macro_recording } },
+					lualine_c = {
+						"progress",
+						{ "macro-recording", fmt = show_macro_recording },
+					},
 					lualine_x = {},
 					lualine_y = { "filetype", "encoding", "searchcount" },
 					lualine_z = {
@@ -793,12 +799,12 @@ require("lazy").setup({
 					},
 				},
 				inactive_sections = {
-					lualine_a = { "filename" },
+					lualine_a = {},
 					lualine_b = {},
 					lualine_c = {},
 					lualine_x = {},
 					lualine_y = {},
-					lualine_z = { "location" },
+					lualine_z = {},
 				},
 				tabline = {},
 				extensions = { "neo-tree", "mason", "fugitive" },
@@ -902,6 +908,11 @@ require("lazy").setup({
 				resize_step_y = 3,
 			},
 		},
+	},
+
+	{
+		"xiyaowong/transparent.nvim",
+		opts = {},
 	},
 
 	-- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
