@@ -852,6 +852,10 @@ require("lazy").setup({
     end,
   },
 
+  {
+    "tpope/vim-fugitive",
+  },
+
   { -- Highlight, edit, and navigate code
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
