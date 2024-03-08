@@ -646,6 +646,16 @@ require("lazy").setup({
       -- Snippet Engine & its associated nvim-cmp source
       {
         "L3MON4D3/LuaSnip",
+        dependencies = {
+          {
+            "danymat/neogen",
+            config = function()
+              require("neogen").setup({
+                snippet_engine = "luasnip",
+              })
+            end,
+          },
+        },
         build = (function()
           -- Build Step is needed for regex support in snippets
           -- This step is not supported in many windows environments
