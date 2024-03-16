@@ -88,10 +88,10 @@ vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagn
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
 -- TIP: Disable arrow keys in normal mode
--- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
--- vim.keymap.set('n', '<right>', '<cmd>echo "Use l to move!!"<CR>')
--- vim.keymap.set('n', '<up>', '<cmd>echo "Use k to move!!"<CR>')
--- vim.keymap.set('n', '<down>', '<cmd>echo "Use j to move!!"<CR>')
+vim.keymap.set("n", "<left>", '<cmd>echo "Use h to move!!"<CR>')
+vim.keymap.set("n", "<right>", '<cmd>echo "Use l to move!!"<CR>')
+vim.keymap.set("n", "<up>", '<cmd>echo "Use k to move!!"<CR>')
+vim.keymap.set("n", "<down>", '<cmd>echo "Use j to move!!"<CR>')
 
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
@@ -392,6 +392,7 @@ require("lazy").setup({
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
       "WhoIsSethDaniel/mason-tool-installer.nvim",
+      "stevearc/aerial.nvim",
 
       -- Useful status updates for LSP.
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -459,7 +460,8 @@ require("lazy").setup({
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
-          map("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
+          -- map("<leader>ds", require("telescope.builtin").lsp_document_symbols, "[D]ocument [S]ymbols")
+          map("<leader>ds", require("telescope").extensions.aerial.aerial, "[D]ocument [S]ymbols")
 
           -- Fuzzy find all the symbols in your current workspace
           --  Similar to document symbols, except searches over your whole project.
@@ -579,7 +581,7 @@ require("lazy").setup({
                 callSnippet = "Replace",
               },
               -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-              diagnostics = { disable = { "missing-fields" } },
+              diagnostics = { disable = { "missing-fields", "undefined-field" } },
             },
           },
         },
@@ -633,7 +635,6 @@ require("lazy").setup({
         lua = { "stylua" },
         rust = { "rustfmt" },
         cpp = { "clang-format" },
-        -- Conform can also run multiple formatters sequentially
         python = { "isort", "black" },
         --
         -- You can use a sub-list to tell conform to run *until* a formatter
@@ -795,6 +796,7 @@ require("lazy").setup({
 
   {
     "nvim-lualine/lualine.nvim",
+    dependencies = { "stevearc/aerial.nvim" },
     config = function()
       require("catppuccin").options.transparent_background = true
       require("lualine").setup({
@@ -807,7 +809,7 @@ require("lazy").setup({
           lualine_a = {
             { "mode" },
           },
-          lualine_b = { { "filename", path = 1 }, "branch", "diff" },
+          lualine_b = { { "filename", path = 1 }, "branch", "diff", "aerial" },
           lualine_c = {
             "progress",
             { "macro-recording", fmt = show_macro_recording },
@@ -892,6 +894,7 @@ require("lazy").setup({
       "nvim-lua/plenary.nvim",
       "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
       "MunifTanjim/nui.nvim",
+      "s1n7ax/nvim-window-picker",
       "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
     },
     config = function()
@@ -951,6 +954,28 @@ require("lazy").setup({
     config = function()
       local set = vim.opt
       set.fillchars = set.fillchars + "diff:╱"
+    end,
+  },
+
+  {
+    "stevearc/aerial.nvim",
+    opts = {},
+    -- Optional dependencies
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-tree/nvim-web-devicons",
+    },
+    config = function()
+      require("aerial").setup({
+        -- optionally use on_attach to set keymaps when aerial has attached to a buffer
+        on_attach = function(bufnr)
+          -- Jump forwards/backwards with '{' and '}'
+          vim.keymap.set("n", "{", "<cmd>AerialPrev<CR>", { buffer = bufnr })
+          vim.keymap.set("n", "}", "<cmd>AerialNext<CR>", { buffer = bufnr })
+        end,
+      })
+      -- You probably also want to set a keymap to toggle aerial
+      vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle<CR>")
     end,
   },
 
