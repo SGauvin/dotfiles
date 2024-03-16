@@ -55,8 +55,28 @@ local enum_snip = s(
   )
 )
 
+local test_snip = s(
+  "test",
+  fmt(
+    [[
+#[cfg(test)]
+mod tests {{
+    #[test]
+    fn {}() {{
+      {}
+    }}
+}}
+    ]],
+    {
+      i(1, "test_name"),
+      i(2, "// Content"),
+    }
+  )
+)
+
 return {
   function_snip,
   pub_function_snip,
   enum_snip,
+  test_snip,
 }, {}
