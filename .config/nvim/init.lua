@@ -260,6 +260,7 @@ require("lazy").setup({
       require("which-key").register({
         ["<leader>c"] = { name = "[C]ode", _ = "which_key_ignore" },
         ["<leader>d"] = { name = "[D]iff", _ = "which_key_ignore" },
+        ["<leader>m"] = { name = "Grapple", _ = "which_key_ignore" },
         ["<leader>r"] = { name = "[R]ename", _ = "which_key_ignore" },
         ["<leader>s"] = { name = "[S]earch", _ = "which_key_ignore" },
         ["<leader>w"] = { name = "[W]orkspace", _ = "which_key_ignore" },
@@ -807,7 +808,7 @@ require("lazy").setup({
           lualine_a = {
             { "mode" },
           },
-          lualine_b = { { "filename", path = 1 }, "branch", "diff", "aerial" },
+          lualine_b = { { "filename", path = 1 }, "branch", "diff", "grapple", "aerial" },
           lualine_c = {
             "progress",
             { "macro-recording", fmt = show_macro_recording },
@@ -993,6 +994,37 @@ require("lazy").setup({
       -- You probably also want to set a keymap to toggle aerial
       vim.keymap.set("n", "<leader>a", "<cmd>AerialToggle<CR>")
     end,
+  },
+
+  {
+    "cbochs/grapple.nvim",
+    opts = {
+      scope = "git",
+    },
+    event = { "BufReadPost", "BufNewFile" },
+    cmd = "Grapple",
+    keys = {
+      {
+        "<leader>mm",
+        function()
+          require("grapple").toggle()
+          require("lualine").refresh()
+        end,
+        desc = "Grapple toggle tag",
+      },
+      {
+        "<leader>mv",
+        function()
+          require("grapple").toggle_tags()
+          require("lualine").refresh()
+        end,
+        desc = "Grapple view",
+      },
+      { "<leader>ma", "<cmd>Grapple select index=1<cr>", desc = "Grapple select 1" },
+      { "<leader>ms", "<cmd>Grapple select index=2<cr>", desc = "Grapple select 2" },
+      { "<leader>md", "<cmd>Grapple select index=3<cr>", desc = "Grapple select 3" },
+      { "<leader>mf", "<cmd>Grapple select index=4<cr>", desc = "Grapple select 4" },
+    },
   },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
