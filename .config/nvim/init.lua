@@ -87,12 +87,6 @@ vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagn
 -- or just use <C-\><C-n> to exit terminal mode
 vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
 
--- TIP: Disable arrow keys in normal mode
-vim.keymap.set("n", "<left>", '<cmd>echo "Use h to move!!"<CR>')
-vim.keymap.set("n", "<right>", '<cmd>echo "Use l to move!!"<CR>')
-vim.keymap.set("n", "<up>", '<cmd>echo "Use k to move!!"<CR>')
-vim.keymap.set("n", "<down>", '<cmd>echo "Use j to move!!"<CR>')
-
 -- Keybinds to make split navigation easier.
 --  Use CTRL+<hjkl> to switch between windows
 --
@@ -387,18 +381,24 @@ require("lazy").setup({
 
   { -- LSP Configuration & Plugins
     "neovim/nvim-lspconfig",
+    opts = {
+      inlay_hints = { enabled = true },
+    },
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for neovim
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
       "WhoIsSethDaniel/mason-tool-installer.nvim",
       "stevearc/aerial.nvim",
+      "folke/neodev.nvim",
 
       -- Useful status updates for LSP.
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
       { "j-hui/fidget.nvim", opts = {} },
     },
     config = function()
+      require("neodev").setup({})
+
       -- Brief Aside: **What is LSP?**
       --
       -- LSP is an acronym you've probably heard, but might not understand what it is.
@@ -531,18 +531,16 @@ require("lazy").setup({
         },
         pyright = {},
         rust_analyzer = {
+          cmd = {
+            "rustup",
+            "run",
+            "stable",
+            "rust-analyzer",
+          },
           settings = {
             ["rust-analyzer"] = {
               checkOnSave = {
-                allFeatures = true,
-                overrideCommand = {
-                  "cargo",
-                  "clippy",
-                  "--workspace",
-                  "--message-format=json",
-                  "--all-targets",
-                  "--all-features",
-                },
+                command = "clippy",
               },
             },
           },
@@ -564,6 +562,7 @@ require("lazy").setup({
           -- capabilities = {},
           settings = {
             Lua = {
+              hint = { enabled = true },
               runtime = { version = "LuaJIT" },
               workspace = {
                 checkThirdParty = false,
