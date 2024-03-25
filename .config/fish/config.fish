@@ -1,8 +1,16 @@
-fish_vi_key_bindings
+# fish_vi_key_bindings
 set fish_greeting
-if status is-interactive
-    # Commands to run in interactive sessions can go here
+# if status is-interactive
+#     # Commands to run in interactive sessions can go here
+# end
+
+function fish_user_key_bindings
+    for mode in insert default visual
+        bind -M $mode \cf forward-char
+    end
 end
+
+fish_user_key_bindings
 
 set -gx EDITOR nvim
 
