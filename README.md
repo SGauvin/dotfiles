@@ -1,6 +1,3 @@
-# Screenshot
-![alt text](images/screenshot.png)
-
 ## Dependencies
 
 - python3
