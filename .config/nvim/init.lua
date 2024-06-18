@@ -1,6 +1,3 @@
-package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?/init.lua;"
-package.path = package.path .. ";" .. vim.fn.expand("$HOME") .. "/.luarocks/share/lua/5.1/?.lua;"
-
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
@@ -50,12 +47,6 @@ vim.opt.timeoutlen = 300
 -- Configure how new splits should be opened
 vim.opt.splitright = true
 vim.opt.splitbelow = true
-
--- Sets how neovim will display certain whitespace in the editor.
---  See `:help 'list'`
---  and `:help 'listchars'`
--- vim.opt.list = true
--- vim.opt.listchars = { tab = "» ", trail = "·", nbsp = "␣" }
 
 -- Preview substitutions live, as you type!
 vim.opt.inccommand = "split"
@@ -144,25 +135,15 @@ require("lazy").setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   "tpope/vim-sleuth", -- Detect tabstop and shiftwidth automatically
 
-  -- NOTE: Plugins can also be added by using a table,
-  -- with the first argument being the link and the following
-  -- keys can be used to configure plugin behavior/loading/etc.
-  --
-  -- Use `opts = {}` to force a plugin to be loaded.
-  --
-  --  This is equivalent to:
-  --    require('Comment').setup({})
+  {
+    "numToStr/Comment.nvim",
+    event = "VeryLazy",
+    opts = {},
+  },
 
-  -- "gc" to comment visual regions/lines
-  { "numToStr/Comment.nvim", opts = {} },
-
-  -- Here is a more advanced example where we pass configuration
-  -- options to `gitsigns.nvim`. This is equivalent to the following lua:
-  --    require('gitsigns').setup({ ... })
-  --
-  -- See `:help gitsigns` to understand what the configuration keys do
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
+  {
     "lewis6991/gitsigns.nvim",
+    event = "VeryLazy",
     opts = {
       signs = {
         add = { text = "│" },
@@ -262,28 +243,18 @@ require("lazy").setup({
     end,
   },
 
-  -- NOTE: Plugins can specify dependencies.
-  --
-  -- The dependencies are proper plugin specifications as well - anything
-  -- you do for a plugin at the top level, you can do for a dependency.
-  --
-  -- Use the `dependencies` key to specify the dependencies of a particular plugin
-
-  { -- Fuzzy Finder (files, lsp, etc)
+  {
     "nvim-telescope/telescope.nvim",
     event = "VeryLazy",
     branch = "0.1.x",
     dependencies = {
       "nvim-lua/plenary.nvim",
-      { -- If encountering errors, see telescope-fzf-native README for install instructions
+      "nvim-telescope/telescope-live-grep-args.nvim",
+      {
         "nvim-telescope/telescope-fzf-native.nvim",
 
-        -- `build` is used to run some command when the plugin is installed/updated.
-        -- This is only run then, not every time Neovim starts up.
         build = "make",
 
-        -- `cond` is a condition used to determine whether this plugin should be
-        -- installed and loaded.
         cond = function()
           return vim.fn.executable("make") == 1
         end,
@@ -296,44 +267,24 @@ require("lazy").setup({
       { "nvim-tree/nvim-web-devicons" },
     },
     config = function()
-      -- Telescope is a fuzzy finder that comes with a lot of different things that
-      -- it can fuzzy find! It's more than just a "file finder", it can search
-      -- many different aspects of Neovim, your workspace, LSP, and more!
-      --
-      -- The easiest way to use telescope, is to start by doing something like:
-      --  :Telescope help_tags
-      --
-      -- After running this command, a window will open up and you're able to
-      -- type in the prompt window. You'll see a list of help_tags options and
-      -- a corresponding preview of the help.
-      --
-      -- Two important keymaps to use while in telescope are:
-      --  - Insert mode: <c-/>
-      --  - Normal mode: ?
-      --
-      -- This opens a window that shows you all of the keymaps for the current
-      -- telescope picker. This is really useful to discover what Telescope can
-      -- do as well as how to actually do it!
+      local telescope = require("telescope")
+      local lga_actions = require("telescope-live-grep-args.actions")
 
-      -- [[ Configure Telescope ]]
-      -- See `:help telescope` and `:help telescope.setup()`
       require("telescope").setup({
-        -- You can put your default mappings / updates / etc. in here
-        --  All the info you're looking for is in `:help telescope.setup()`
-        --
-        -- defaults = {
-        --   mappings = {
-        --     i = { ['<c-enter>'] = 'to_fuzzy_refine' },
-        --   },
-        -- },
         pickers = {
           find_file = {
             hidden = true,
           },
         },
         extensions = {
-          ["ui-select"] = {
-            require("telescope.themes").get_dropdown(),
+          live_grep_args = {
+            auto_quoting = true, -- enable/disable auto-quoting
+            mappings = { -- extend mappings
+              i = {
+                ["<C-k>"] = lga_actions.quote_prompt(),
+                ["<C-i>"] = lga_actions.quote_prompt({ postfix = " --iglob " }),
+              },
+            },
           },
         },
       })
@@ -348,7 +299,12 @@ require("lazy").setup({
       vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
       vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[S]earch [F]iles" })
       vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
-      vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
+      vim.keymap.set(
+        "n",
+        "<leader>sg",
+        require("telescope").extensions.live_grep_args.live_grep_args,
+        { desc = "[S]earch by [G]rep" }
+      )
       vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
       vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
       vim.keymap.set("n", "<leader>sb", builtin.git_branches, { desc = "[S]earch [B]ranches" })
@@ -393,43 +349,19 @@ require("lazy").setup({
       "WhoIsSethDaniel/mason-tool-installer.nvim",
       "stevearc/aerial.nvim",
       "folke/neodev.nvim",
+      "stevearc/conform.nvim",
 
       -- Useful status updates for LSP.
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
       { "j-hui/fidget.nvim", opts = {} },
     },
+    -- event = "LazyDone",
     config = function()
       require("neodev").setup({})
 
-      -- Brief Aside: **What is LSP?**
-      --
-      -- LSP is an acronym you've probably heard, but might not understand what it is.
-      --
-      -- LSP stands for Language Server Protocol. It's a protocol that helps editors
-      -- and language tooling communicate in a standardized fashion.
-      --
-      -- In general, you have a "server" which is some tool built to understand a particular
-      -- language (such as `gopls`, `lua_ls`, `rust_analyzer`, etc). These Language Servers
-      -- (sometimes called LSP servers, but that's kind of like ATM Machine) are standalone
-      -- processes that communicate with some "client" - in this case, Neovim!
-      --
-      -- LSP provides Neovim with features like:
-      --  - Go to definition
-      --  - Find references
-      --  - Autocompletion
-      --  - Symbol Search
-      --  - and more!
-      --
-      -- Thus, Language Servers are external tools that must be installed separately from
-      -- Neovim. This is where `mason` and related plugins come into play.
-      --
-      -- If you're wondering about lsp vs treesitter, you can check out the wonderfully
-      -- and elegantly composed help section, `:help lsp-vs-treesitter`
+      -- vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
+      vim.keymap.set("n", "<leader>f", require("conform").format)
 
-      --  This function gets run when an LSP attaches to a particular buffer.
-      --    That is to say, every time a new file is opened that is associated with
-      --    an lsp (for example, opening `main.rs` is associated with `rust_analyzer`) this
-      --    function will be executed to configure the current buffer
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
         callback = function(event)
@@ -520,72 +452,47 @@ require("lazy").setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-      local servers = {
-        clangd = {
-          cmd = {
-            "clangd",
-            "--background-index",
-            "--clang-tidy",
-            "--completion-style=bundled",
-            "--cross-file-rename",
-            "--header-insertion=iwyu",
-          },
-        },
-        pyright = {},
-        rust_analyzer = {
-          cmd = {
-            "rustup",
-            "run",
-            "stable",
-            "rust-analyzer",
-          },
-          settings = {
-            ["rust-analyzer"] = {
-              checkOnSave = {
-                command = "clippy",
-              },
-            },
-          },
-        },
-        jsonls = {},
+      local servers = {}
 
-        -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
-        --
-        -- Some languages (like typescript) have entire language plugins that can be useful:
-        --    https://github.com/pmizio/typescript-tools.nvim
-        --
-        -- But for many setups, the LSP (`tsserver`) will work just fine
-        tsserver = {},
-        --
+      require("lspconfig").clangd.setup({
+        cmd = {
+          "clangd",
+          "--background-index",
+          "--clang-tidy",
+          "--completion-style=bundled",
+          "--cross-file-rename",
+          "--header-insertion=iwyu",
+        },
+      })
 
-        lua_ls = {
-          -- cmd = {...},
-          -- filetypes { ...},
-          -- capabilities = {},
-          settings = {
-            Lua = {
-              hint = { enabled = true },
-              runtime = { version = "LuaJIT" },
-              workspace = {
-                checkThirdParty = false,
-                -- Tells lua_ls where to find all the Lua files that you have loaded
-                -- for your neovim configuration.
-                library = {
-                  "${3rd}/luv/library",
-                  unpack(vim.api.nvim_get_runtime_file("", true)),
-                },
-                -- If lua_ls is really slow on your computer, you can try this instead:
-                -- library = { vim.env.VIMRUNTIME },
+      require("lspconfig").jsonls.setup({})
+
+      require("lspconfig").lua_ls.setup({
+        settings = {
+          Lua = {
+            hint = { enabled = true },
+            runtime = { version = "LuaJIT" },
+            workspace = {
+              checkThirdParty = false,
+              -- Tells lua_ls where to find all the Lua files that you have loaded
+              -- for your neovim configuration.
+              library = {
+                "${3rd}/luv/library",
+                unpack(vim.api.nvim_get_runtime_file("", true)),
               },
-              completion = {
-                callSnippet = "Replace",
-              },
-              -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
-              diagnostics = { disable = { "missing-fields", "undefined-field" } },
+              -- If lua_ls is really slow on your computer, you can try this instead:
+              -- library = { vim.env.VIMRUNTIME },
             },
+            completion = {
+              callSnippet = "Replace",
+            },
+            -- You can toggle below to ignore Lua_LS's noisy `missing-fields` warnings
+            diagnostics = { disable = { "missing-fields", "undefined-field" } },
           },
         },
-      }
+      })
+
+      require("lspconfig").ruff.setup({})
 
       -- Ensure the servers and tools above are installed
       --  To check the current status of installed tools and/or manually install
@@ -597,15 +504,8 @@ require("lazy").setup({
 
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
-      local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, {
-        "stylua", -- Used to format lua code
-        "clang-format",
-        "black",
-        "isort",
-        "prettierd",
-        "prettier",
-      })
+      -- local ensure_installed = vim.tbl_keys(servers or {})
+      local ensure_installed = {}
       require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
       require("mason-lspconfig").setup({
@@ -621,27 +521,6 @@ require("lazy").setup({
         },
       })
     end,
-  },
-
-  { -- Autoformat
-    "stevearc/conform.nvim",
-    opts = {
-      notify_on_error = false,
-      format_on_save = {
-        timeout_ms = 500,
-        lsp_fallback = true,
-      },
-      formatters_by_ft = {
-        lua = { "stylua" },
-        rust = { "rustfmt" },
-        cpp = { "clang-format" },
-        python = { "isort", "black" },
-        --
-        -- You can use a sub-list to tell conform to run *until* a formatter
-        -- is found.
-        javascript = { { "prettierd", "prettier" } },
-      },
-    },
   },
 
   { -- Autocompletion
@@ -771,10 +650,16 @@ require("lazy").setup({
   },
 
   -- Highlight todo, notes, etc in comments
-  { "folke/todo-comments.nvim", dependencies = { "nvim-lua/plenary.nvim" }, opts = { signs = false } },
+  {
+    "folke/todo-comments.nvim",
+    event = "VeryLazy",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = { signs = false },
+  },
 
   { -- Collection of various small independent plugins/modules
     "echasnovski/mini.nvim",
+    event = "VeryLazy",
     config = function()
       -- Better Around/Inside textobjects
       --
@@ -790,13 +675,21 @@ require("lazy").setup({
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require("mini.surround").setup()
-      require("mini.pairs").setup()
     end,
+  },
+
+  {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    config = true,
+    -- use opts = {} for passing setup options
+    -- this is equalent to setup({}) function
   },
 
   {
     "nvim-lualine/lualine.nvim",
     dependencies = { "stevearc/aerial.nvim" },
+    event = "VeryLazy",
     config = function()
       require("catppuccin").options.transparent_background = true
       require("lualine").setup({
@@ -863,6 +756,7 @@ require("lazy").setup({
 
   {
     "tpope/vim-fugitive",
+    event = "VeryLazy",
   },
 
   -- {
@@ -891,12 +785,12 @@ require("lazy").setup({
   { -- Highlight, edit, and navigate code
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
+    event = "VeryLazy",
     config = function()
       -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
 
       ---@diagnostic disable-next-line: missing-fields
       require("nvim-treesitter.configs").setup({
-        ensure_installed = "all",
         -- Autoinstall languages that are not installed
         auto_install = true,
         highlight = { enable = true },
@@ -906,62 +800,26 @@ require("lazy").setup({
   },
 
   {
-    "nvim-neo-tree/neo-tree.nvim",
-    branch = "v3.x",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
-      "MunifTanjim/nui.nvim",
-      "s1n7ax/nvim-window-picker",
-      "3rd/image.nvim", -- Optional image support in preview window: See `# Preview Mode` for more information
-    },
+    "stevearc/oil.nvim",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
-      vim.keymap.set("n", "<C-f>", "<cmd>Neotree action=focus toggle<CR>")
-      require("neo-tree").setup({
-        close_if_last_window = true,
-        filesystem = {
-          follow_current_file = {
-            enabled = true,
-            leave_dirs_open = false,
-          },
-          hijack_netrw_behavior = "open_current",
-          filtered_items = {
-            hide_dotfiles = false,
-            hide_gitignored = false,
-          },
+      require("oil").setup({
+        keymaps = {
+          ["<C-h>"] = false,
+          ["W"] = "actions.select_split",
+        },
+        view_options = {
+          show_hidden = true,
         },
       })
+
+      vim.keymap.set("n", "<C-f>", require("oil").toggle_float)
     end,
   },
 
   {
-    "3rd/image.nvim",
-    opts = {
-      tmux_show_only_in_active_window = true,
-    },
-  },
-
-  {
-    "aserowy/tmux.nvim",
-    opts = {
-      copy_sync = {
-        sync_clipboard = false,
-      },
-      resize = {
-        enable_default_keybindings = true,
-        resize_step_x = 3,
-        resize_step_y = 3,
-      },
-    },
-  },
-
-  {
-    "xiyaowong/transparent.nvim",
-    opts = {},
-  },
-
-  {
     "sindrets/diffview.nvim",
+    event = "VeryLazy",
     opts = {
       view = {
         merge_tool = {
@@ -983,6 +841,7 @@ require("lazy").setup({
       "nvim-treesitter/nvim-treesitter",
       "nvim-tree/nvim-web-devicons",
     },
+    event = "VeryLazy",
     config = function()
       require("aerial").setup({
         -- optionally use on_attach to set keymaps when aerial has attached to a buffer
@@ -1028,25 +887,51 @@ require("lazy").setup({
     },
   },
 
-  -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
-  -- init.lua. If you want these files, they are in the repository, so you can just download them and
-  -- put them in the right spots if you want.
+  {
+    "mrcjkb/rustaceanvim",
+    version = "^4",
+    lazy = false,
+  },
 
-  -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for kickstart
-  --
-  --  Here are some example plugins that I've included in the kickstart repository.
-  --  Uncomment any of the lines below to enable them (you will need to restart nvim).
+  {
+    "folke/neoconf.nvim",
+    opts = {},
+  },
+
+  {
+    "stevearc/conform.nvim",
+    opts = {
+      formatters_by_ft = {
+        lua = { "stylua" },
+        python = { "ruff_format" },
+        cpp = { "clang-format" },
+        rust = { "rustfmt" },
+      },
+    },
+  },
+
+  {
+    "folke/flash.nvim",
+    event = "VeryLazy",
+    opts = {},
+    keys = {
+      {
+        "S",
+        mode = { "n", "x", "o" },
+        function()
+          require("flash").treesitter()
+        end,
+        desc = "Flash Treesitter",
+      },
+    },
+  },
+
+  { "akinsho/toggleterm.nvim", version = "*", config = true },
 
   require("kickstart.plugins.debug"),
   require("kickstart.plugins.indent_line"),
 
-  -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-  --    This is the easiest way to modularize your config.
-  --
-  --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
   { import = "custom.plugins" },
 })
 
--- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

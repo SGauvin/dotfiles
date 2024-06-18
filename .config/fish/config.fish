@@ -15,17 +15,18 @@ fish_user_key_bindings
 set -gx EDITOR nvim
 
 fish_add_path --path ~/.local/share/bob/nvim-bin
+fish_add_path --path ~/.local/clang+llvm-18.1.6-aarch64-linux-gnu/bin/
 
 # Zoxide
 zoxide init --cmd cd fish | source
 
 function ya
-	set tmp (mktemp -t "yazi-cwd.XXXXX")
-	yazi $argv --cwd-file="$tmp"
-	if set cwd (cat -- "$tmp"); and [ -n "$cwd" ]; and [ "$cwd" != "$PWD" ]
-		cd "$cwd"
-	end
-	rm -f -- "$tmp"
+    set tmp (mktemp -t "yazi-cwd.XXXXX")
+    yazi $argv --cwd-file="$tmp"
+    if set cwd (cat -- "$tmp"); and [ -n "$cwd" ]; and [ "$cwd" != "$PWD" ]
+        cd "$cwd"
+    end
+    rm -f -- "$tmp"
 end
 
 starship init fish | source
