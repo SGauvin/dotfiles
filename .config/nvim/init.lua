@@ -906,6 +906,7 @@ require("lazy").setup({
         python = { "ruff_format" },
         cpp = { "clang-format" },
         rust = { "rustfmt" },
+        json = { "fixjson" },
       },
     },
   },
@@ -930,6 +931,7 @@ require("lazy").setup({
 
   require("kickstart.plugins.debug"),
   require("kickstart.plugins.indent_line"),
+
 
   { import = "custom.plugins" },
 })
