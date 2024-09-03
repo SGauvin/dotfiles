@@ -13,18 +13,22 @@ return {
     },
     {
       "SGauvin/ctest-telescope.nvim",
-      opts = {
-        dap_config = {
-          stopAtEntry = false,
-          setupCommands = {
-            {
-              text = "-enable-pretty-printing",
-              description = "Enable pretty printing",
-              ignoreFailures = false,
+      branch="extra_args",
+      config = function()
+        require("ctest-telescope").setup({
+          extra_ctest_args = { "-C", "Debug" },
+          dap_config = {
+            stopAtEntry = true,
+            setupCommands = {
+              {
+                text = "-enable-pretty-printing",
+                description = "Enable pretty printing",
+                ignoreFailures = false,
+              },
             },
           },
-        },
-      },
+        })
+      end,
     },
   },
   config = function()
@@ -37,6 +41,11 @@ return {
       ensure_installed = {},
     })
 
+    vim.keymap.set("n", "<F1>", dap.step_into)
+    vim.keymap.set("n", "<F2>", dap.step_over)
+    vim.keymap.set("n", "<F3>", dap.step_out)
+    vim.keymap.set("n", "<F4>", dap.run_to_cursor)
+
     vim.keymap.set("n", "<F5>", function()
       if dap.session() == nil then
         if vim.bo.filetype == "c" or vim.bo.filetype == "cpp" then
@@ -45,9 +54,9 @@ return {
       else
         dap.continue()
       end
-    end, { desc = "Debug: Start/Continue" })
+    end)
 
-    vim.keymap.set("n", "<F4>", function()
+    vim.keymap.set("n", "<F6>", function()
       if dap.session() == nil then
         dap.configurations.cpp = {}
         -- require("dap.ext.vscode").load_launchjs(nil, { cppdbg = { "c", "cpp" } })
@@ -55,15 +64,14 @@ return {
       end
     end)
 
-    vim.keymap.set("n", "<F1>", dap.step_into, { desc = "Debug: Step Into" })
-    vim.keymap.set("n", "<F2>", dap.step_over, { desc = "Debug: Step Over" })
-    vim.keymap.set("n", "<F3>", dap.step_out, { desc = "Debug: Step Out" })
     vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
+
     vim.keymap.set("n", "<leader>B", function()
       dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
     end)
 
     vim.keymap.set("n", "<F7>", dapui.toggle, { desc = "Debug: See last session result." })
+
     vim.keymap.set("n", "<F8>", dapui.eval)
 
     dap.listeners.after.event_initialized["dapui_config"] = dapui.open

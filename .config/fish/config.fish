@@ -16,6 +16,7 @@ set -gx EDITOR nvim
 
 fish_add_path --path ~/.local/share/bob/nvim-bin
 fish_add_path --path ~/.local/clang+llvm-18.1.6-aarch64-linux-gnu/bin/
+fish_add_path --path /home/simon/.local/share/pnpm
 
 # Zoxide
 zoxide init --cmd cd fish | source
